@@ -16,18 +16,21 @@
 """A Web interface to beets."""
 from __future__ import division, absolute_import, print_function
 
-from beets.plugins import BeetsPlugin
-from beets import ui
-from beets import util
-import beets.library
-import flask
-from flask import g
-from werkzeug.routing import BaseConverter, PathConverter
-import os
-from unidecode import unidecode
-import json
 import base64
+import beets.library
+import beets.plugins
+import beets.ui
+import beets.util
+import flask
+import glob
+import gunicorn.app.base
+import json
+import multiprocessing
+import os
+import unidecode
+import werkzeug.routing
 
+from flask import g
 
 # Utilities.
 
@@ -40,7 +43,7 @@ def _rep(obj, expand=False):
 
     if isinstance(obj, beets.library.Item):
         if app.config.get('INCLUDE_PATHS', False):
-            out['path'] = util.displayable_path(out['path'])
+            out['path'] = beets.util.displayable_path(out['path'])
         else:
             del out['path']
 
@@ -52,7 +55,7 @@ def _rep(obj, expand=False):
         # Get the size (in bytes) of the backing file. This is useful
         # for the Tomahawk resolver API.
         try:
-            out['size'] = os.path.getsize(util.syspath(obj.path))
+            out['size'] = os.path.getsize(beets.util.syspath(obj.path))
         except OSError:
             out['size'] = 0
 
@@ -155,7 +158,7 @@ def _get_unique_table_field_values(model, field, sort_field):
     return [row[0] for row in rows]
 
 
-class IdListConverter(BaseConverter):
+class IdListConverter(werkzeug.routing.BaseConverter):
     """Converts comma separated lists of ids in urls to integer lists.
     """
 
@@ -172,7 +175,7 @@ class IdListConverter(BaseConverter):
         return ','.join(value)
 
 
-class QueryConverter(PathConverter):
+class QueryConverter(werkzeug.routing.PathConverter):
     """Converts slash separated lists of queries in the url to string list.
     """
 
@@ -183,7 +186,7 @@ class QueryConverter(PathConverter):
         return ','.join(value)
 
 
-class EverythingConverter(PathConverter):
+class EverythingConverter(werkzeug.routing.PathConverter):
     regex = '.*?'
 
 
@@ -193,6 +196,19 @@ app = flask.Flask(__name__)
 app.url_map.converters['idlist'] = IdListConverter
 app.url_map.converters['query'] = QueryConverter
 app.url_map.converters['everything'] = EverythingConverter
+
+
+@app.context_processor
+def override_url_for():
+    return dict(url_for=dated_url_for)
+
+def dated_url_for(endpoint, **values):
+    if endpoint == 'static':
+        filename = values.get('filename', None)
+        if filename:
+            file_path = os.path.join(app.root_path, endpoint, filename)
+            values['q'] = str(int(os.stat(file_path).st_mtime))
+    return flask.url_for(endpoint, **values)
 
 
 @app.before_request
@@ -222,21 +238,21 @@ def item_file(item_id):
     # On Windows under Python 2, Flask wants a Unicode path. On Python 3, it
     # *always* wants a Unicode path.
     if os.name == 'nt':
-        item_path = util.syspath(item.path)
+        item_path = beets.util.syspath(item.path)
     else:
-        item_path = util.py3_path(item.path)
+        item_path = beets.util.py3_path(item.path)
 
     try:
-        unicode_item_path = util.text_string(item.path)
+        unicode_item_path = beets.util.text_string(item.path)
     except (UnicodeDecodeError, UnicodeEncodeError):
-        unicode_item_path = util.displayable_path(item.path)
+        unicode_item_path = beets.util.displayable_path(item.path)
 
     base_filename = os.path.basename(unicode_item_path)
     try:
         # Imitate http.server behaviour
         base_filename.encode("latin-1", "strict")
     except UnicodeEncodeError:
-        safe_filename = unidecode(base_filename)
+        safe_filename = unidecode.unidecode(base_filename)
     else:
         safe_filename = base_filename
 
@@ -349,12 +365,13 @@ def home():
 
 # Plugin hook.
 
-class WebPlugin(BeetsPlugin):
+class WebPlugin(beets.plugins.BeetsPlugin):
     def __init__(self):
         super(WebPlugin, self).__init__()
         self.config.add({
             'host': u'127.0.0.1',
             'port': 8337,
+            'bind': '',
             'cors': '',
             'cors_supports_credentials': False,
             'reverse_proxy': False,
@@ -362,12 +379,12 @@ class WebPlugin(BeetsPlugin):
         })
 
     def commands(self):
-        cmd = ui.Subcommand('web', help=u'start a Web interface')
+        cmd = beets.ui.Subcommand('web', help=u'start a Web interface')
         cmd.parser.add_option(u'-d', u'--debug', action='store_true',
                               default=False, help=u'debug mode')
 
         def func(lib, opts, args):
-            args = ui.decargs(args)
+            args = beets.ui.decargs(args)
             if args:
                 self.config['host'] = args.pop(0)
             if args:
@@ -400,9 +417,30 @@ class WebPlugin(BeetsPlugin):
                 app.wsgi_app = ReverseProxied(app.wsgi_app)
 
             # Start the web application.
-            app.run(host=self.config['host'].as_str(),
-                    port=self.config['port'].get(int),
-                    debug=opts.debug, threaded=True)
+            bind = self.config['bind'].as_str() or '{}:{}'.format(
+                self.config['host'].as_str(), self.config['port'].get(int))
+
+            class App(gunicorn.app.base.BaseApplication):
+
+                def load_config(self):
+                    self.cfg.set('bind', bind)
+                    workers = 1 + multiprocessing.cpu_count()
+                    if opts.debug:
+                        self.cfg.set('accesslog', '-')
+                        self.cfg.set('reload', True)
+                        here = os.path.dirname(__file__)
+                        extras = []
+                        for name in ('static', 'templates'):
+                            extras.extend(glob.glob(os.path.join(here, name, '*')))
+                        self.cfg.set('reload_extra_files', extras)
+                        workers = 1
+                    self.cfg.set('workers', workers)
+
+                def load(self):
+                    return app
+
+            App().run()
+
         cmd.func = func
         return [cmd]
 
