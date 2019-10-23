@@ -197,19 +197,6 @@ app.url_map.converters['query'] = QueryConverter
 app.url_map.converters['everything'] = EverythingConverter
 
 
-@app.context_processor
-def override_url_for():
-    return dict(url_for=dated_url_for)
-
-def dated_url_for(endpoint, **values):
-    if endpoint == 'static':
-        filename = values.get('filename', None)
-        if filename:
-            file_path = os.path.join(app.root_path, endpoint, filename)
-            values['q'] = str(int(os.stat(file_path).st_mtime))
-    return flask.url_for(endpoint, **values)
-
-
 @app.before_request
 def before_request():
     g.lib = app.config['lib']
@@ -418,34 +405,33 @@ class WebPlugin(beets.plugins.BeetsPlugin):
             # Start the web application.
             host = self.config['host'].as_str()
             port = self.config['port'].get(int)
+            bind = self.config['bind'].as_str()
 
             try:
                 import gunicorn.app.base
+            except ImportError:
+                return app.run(host=host, port=port, debug=opts.debug, threaded=True)
 
-                bind = self.config['bind'].as_str()
+            class Unicorn(gunicorn.app.base.BaseApplication):
 
-                class Unicorn(gunicorn.app.base.BaseApplication):
+                def load_config(self):
+                    self.cfg.set('bind', bind or '{}:{}'.format(host, port))
+                    workers = 1 + multiprocessing.cpu_count()
+                    if opts.debug:
+                        self.cfg.set('accesslog', '-')
+                        self.cfg.set('reload', True)
+                        here = os.path.dirname(__file__)
+                        extras = []
+                        for name in ('static', 'templates'):
+                            extras.extend(glob.glob(os.path.join(here, name, '*')))
+                        self.cfg.set('reload_extra_files', extras)
+                        workers = 1
+                    self.cfg.set('workers', workers)
 
-                    def load_config(self):
-                        self.cfg.set('bind', bind or '{}:{}'.format(host, port))
-                        workers = 1 + multiprocessing.cpu_count()
-                        if opts.debug:
-                            self.cfg.set('accesslog', '-')
-                            self.cfg.set('reload', True)
-                            here = os.path.dirname(__file__)
-                            extras = []
-                            for name in ('static', 'templates'):
-                                extras.extend(glob.glob(os.path.join(here, name, '*')))
-                            self.cfg.set('reload_extra_files', extras)
-                            workers = 1
-                        self.cfg.set('workers', workers)
+                def load(self):
+                    return app
 
-                    def load(self):
-                        return app
-
-                Unicorn().run()
-            except:
-                app.run(host=host, port=port, debug=opts.debug, threaded=True)
+            Unicorn().run()
 
         cmd.func = func
         return [cmd]

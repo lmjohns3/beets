@@ -91,14 +91,12 @@ class App extends React.Component {
     }
 
     toggle() {
-        console.log('toggle', this.state);
         this.state.player.playing ? this.audio.pause() : this.audio.play();
     }
 
     remove(idx) {
         this.setState(state => {
             const playlist = state.playlist.splice(idx, 1);
-            console.log("remove", idx, state, playlist);
             if (idx === state.current) {
             }
             return {playlist: playlist};
@@ -107,11 +105,14 @@ class App extends React.Component {
 
     setCurrent(idx) {
         this.setState(state => {
+            this.audio.pause();
             if (0 <= idx && idx < state.playlist.length) {
-                this.audio.pause();
                 this.audio.src = `/item/${state.playlist[idx].id}/file`;
                 this.audio.play();
                 return {current: idx};
+            } else {
+                this.audio.src = "";
+                return {current: -1};
             }
         });
     }
@@ -149,12 +150,12 @@ const Playlist = ({playlist, current, player, toggle, remove, setCurrent}) => (
 const PlaylistItem = ({item, active, onClick, player}) => {
     const timeFormat = s => {
         s = Math.round(s > 0 ? s : 0);
-        return `${Math.floor(s / 60)}:${(s % 60) < 10 ? '0' : ''}${s % 60}`;
+        return `${Math.floor(s / 60)}:${(s % 60) < 10 ? "0" : ""}${s % 60}`;
     };
     const timePercent = s => {
         const t = player.duration;
         return (s > 0 && t > 0) ?
-               (Math.round(Math.min(s / t, 1) * 10000) / 100) + '%' : '0%';
+               (Math.round(Math.min(s / t, 1) * 10000) / 100) + "%" : "0%";
     };
     return (
         <div id={`item-${item.id}`} className={active ? "active item" : "item"}>
