@@ -23,7 +23,6 @@ import beets.ui
 import beets.util
 import flask
 import glob
-import gunicorn.app.base
 import json
 import multiprocessing
 import os
@@ -417,29 +416,36 @@ class WebPlugin(beets.plugins.BeetsPlugin):
                 app.wsgi_app = ReverseProxied(app.wsgi_app)
 
             # Start the web application.
-            bind = self.config['bind'].as_str() or '{}:{}'.format(
-                self.config['host'].as_str(), self.config['port'].get(int))
+            host = self.config['host'].as_str()
+            port = self.config['port'].get(int)
 
-            class App(gunicorn.app.base.BaseApplication):
+            try:
+                import gunicorn.app.base
 
-                def load_config(self):
-                    self.cfg.set('bind', bind)
-                    workers = 1 + multiprocessing.cpu_count()
-                    if opts.debug:
-                        self.cfg.set('accesslog', '-')
-                        self.cfg.set('reload', True)
-                        here = os.path.dirname(__file__)
-                        extras = []
-                        for name in ('static', 'templates'):
-                            extras.extend(glob.glob(os.path.join(here, name, '*')))
-                        self.cfg.set('reload_extra_files', extras)
-                        workers = 1
-                    self.cfg.set('workers', workers)
+                bind = self.config['bind'].as_str()
 
-                def load(self):
-                    return app
+                class Unicorn(gunicorn.app.base.BaseApplication):
 
-            App().run()
+                    def load_config(self):
+                        self.cfg.set('bind', bind or '{}:{}'.format(host, port))
+                        workers = 1 + multiprocessing.cpu_count()
+                        if opts.debug:
+                            self.cfg.set('accesslog', '-')
+                            self.cfg.set('reload', True)
+                            here = os.path.dirname(__file__)
+                            extras = []
+                            for name in ('static', 'templates'):
+                                extras.extend(glob.glob(os.path.join(here, name, '*')))
+                            self.cfg.set('reload_extra_files', extras)
+                            workers = 1
+                        self.cfg.set('workers', workers)
+
+                    def load(self):
+                        return app
+
+                Unicorn().run()
+            except:
+                app.run(host=host, port=port, debug=opts.debug, threaded=True)
 
         cmd.func = func
         return [cmd]
