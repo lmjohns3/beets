@@ -346,7 +346,7 @@ def stats():
 
 @app.route('/')
 def home():
-    return flask.render_template('index.html')
+    return flask.render_template('index.html', debug=app.config['debug'])
 
 
 # Plugin hook.
@@ -376,6 +376,7 @@ class WebPlugin(beets.plugins.BeetsPlugin):
             if args:
                 self.config['port'] = int(args.pop(0))
 
+            app.config['debug'] = opts.debug
             app.config['lib'] = lib
             # Normalizes json output
             app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False

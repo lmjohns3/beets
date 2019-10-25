@@ -4,8 +4,15 @@
 <link href="{{ url_for('static', filename='manifest.json') }}" rel="manifest" />
 <link href="{{ url_for('static', filename='beets.css') }}" rel="stylesheet" type="text/css" />
 <body><audio id="audio"></audio><div id="root"></div>
+{% if debug %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.10.2/umd/react.development.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.10.2/umd/react-dom.development.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/2.0.4/dexie.js"></script>
+{% else %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.10.2/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.10.2/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/2.0.4/dexie.min.js"></script>
+{% endif %}
 <script src="{{ url_for('static', filename='beets.js') }}" type="text/babel"></script>
