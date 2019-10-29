@@ -38,17 +38,16 @@ class App extends React.Component {
                     buffered = Math.max(buffered, this.audio.buffered.end(i));
                 }
             }
-            const playing = (this.audio &&
-                             this.audio.currentTime > 0 &&
-                             !this.audio.paused &&
-                             !this.audio.ended &&
-                             this.audio.readyState > 2);
             const nanguard = f => isNaN(f) ? -1 : f;
             this.setState({player: {
                 duration: nanguard(this.audio.duration),
                 buffered: nanguard(buffered),
                 currentTime: nanguard(this.audio.currentTime),
-                playing: playing,
+                playing: (this.audio &&
+                          this.audio.currentTime > 0 &&
+                          !this.audio.paused &&
+                          !this.audio.ended &&
+                          this.audio.readyState > 2),
             }});
         };
         this.audio.onplay = () => {
@@ -96,10 +95,14 @@ class App extends React.Component {
 
     remove(idx) {
         this.setState(state => {
-            const playlist = state.playlist.splice(idx, 1);
-            if (idx === state.current) {
-            }
-            return {playlist: playlist};
+            state.playlist.splice(idx, 1);
+            if (state.playlist.length === 0)
+                return {playlist: [], current: -1};
+            return {
+                playlist: state.playlist,
+                current: Math.min(Math.max(0, state.current - 1),
+                                  state.playlist.length - 1),
+            };
         });
     }
 
@@ -141,36 +144,54 @@ const Playlist = ({playlist, current, player, toggle, remove, setCurrent}) => (
         <li key={i}>
         <PlaylistItem item={item}
                       active={current === i}
-                      onClick={current === i ? toggle :  () => setCurrent(i)}
+                      playPause={current === i ? toggle :  () => setCurrent(i)}
+                      remove={() => remove(i)}
                       player={player} />
         </li>
     ))}</ul>
 )
 
-const PlaylistItem = ({item, active, onClick, player}) => {
-    const timeFormat = s => {
-        s = Math.round(s > 0 ? s : 0);
-        return `${Math.floor(s / 60)}:${(s % 60) < 10 ? "0" : ""}${s % 60}`;
-    };
-    const timePercent = s => {
-        const t = player.duration;
-        return (s > 0 && t > 0) ?
-               (Math.round(Math.min(s / t, 1) * 10000) / 100) + "%" : "0%";
-    };
-    return (
-        <div id={`item-${item.id}`} className={active ? "active item" : "item"}>
-        <div onClick={onClick} className="art" style={{backgroundImage: `url(/album/${item.album_id}/art)`}}></div>
-        <div onClick={onClick} className="title">{item.title}</div>
-        <div onClick={onClick} className="artist">{item.artist}</div>
-        {active && (
-            <div className="time">
-            <div className="currentTime" style={{width: timePercent(player.currentTime)}}>
-                <span>{timeFormat(player.currentTime)}</span></div>
-            <div className="buffered" style={{width: timePercent(player.buffered)}}></div>
-            <div className="duration"><span>{timeFormat(player.duration)}</span></div>
+class PlaylistItem extends React.Component {
+    componentDidMount() {
+        this._hammer = Hammer(this._el);
+        this._hammer.on('swipe', this.props.remove);
+    }
+
+    componentWillUnmount() {
+        this._hammer.off('swipe', this.props.remove);
+        delete this._hammer;
+    }
+
+    render() {
+        const {item, active, playPause, remove, player} = this.props;
+        const timeFormat = s => {
+            s = Math.round(s > 0 ? s : 0);
+            return `${Math.floor(s / 60)}:${(s % 60) < 10 ? "0" : ""}${s % 60}`;
+        };
+        const timePercent = s => {
+            const t = player.duration;
+            return (s > 0 && t > 0) ?
+                   (Math.round(Math.min(s / t, 1) * 10000) / 100) + "%" : "0%";
+        };
+        return (<div id={`item-${item.id}`}
+                     ref={el => this._el = el}
+                     onClick={playPause} 
+                     className={active ? "active item" : "item"}>
+            <div className="art" style={{backgroundImage: `url(/album/${item.album_id}/art)`}}></div>
+            <div className="title">{item.title}</div>
+            <div className="artist">{item.artist}</div>
+            {active && (<div>
+                {player.playing ? <div className="pause">&#x23f8;</div>
+                                : <div className="play">&#x25b6;</div>}
+                <div className="time">
+                <div className="currentTime" style={{width: timePercent(player.currentTime)}}>
+                    <span>{timeFormat(player.currentTime)}</span></div>
+                <div className="buffered" style={{width: timePercent(player.buffered)}}></div>
+                <div className="duration"><span>{timeFormat(player.duration)}</span></div>
+                </div>
             </div>)}
-        </div>
-    );
+        </div>);
+    }
 }
 
 /*
@@ -244,14 +265,17 @@ class AlbumContainer extends React.Component {
 
 const Album = ({album, tracks, add}) => (
   <div className="album">
-    <div onClick={() => add(tracks)} className="art" style={{backgroundImage: `url(/album/${album.id}/art)`}}></div>
+    <div onClick={() => add(tracks)} className="art"
+         style={{backgroundImage: `url(/album/${album.id}/art)`}}></div>
     <div onClick={() => add(tracks)} className="title">{album.album}</div>
-    <div className="artist">{album.albumartist}</div>
+    <div onClick={() => add(tracks)} className="artist">{album.albumartist}</div>
     <ul className="tracks">{tracks.map((track) => {
         const title = <div className="title">{track.title}</div>;
         const artist = track.artist === track.albumartist ?
                        "" : <div className="artist">{track.artist}</div>;
-        return <li className="track" onClick={() => addTrack(track)} key={track.id}>{title}{artist}</li>;
+        return <li className="track"
+                   onClick={() => add([track])}
+                   key={track.id}>{title}{artist}</li>;
     })}</ul>
   </div>
 )
