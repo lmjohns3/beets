@@ -175,14 +175,12 @@ class PlaylistItem extends React.Component {
         };
         return (<div id={`item-${item.id}`}
                      ref={el => this._el = el}
-                     onClick={playPause} 
+                     onClick={playPause}
                      className={active ? "active item" : "item"}>
             <div className="art" style={{backgroundImage: `url(/album/${item.album_id}/art)`}}></div>
             <div className="title">{item.title}</div>
             <div className="artist">{item.artist}</div>
             {active && (<div>
-                {player.playing ? <div className="pause">&#x23f8;</div>
-                                : <div className="play">&#x25b6;</div>}
                 <div className="time">
                 <div className="currentTime" style={{width: timePercent(player.currentTime)}}>
                     <span>{timeFormat(player.currentTime)}</span></div>
@@ -202,9 +200,16 @@ class LibraryContainer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {albums: [], songs: []};
+        this.search = this.search.bind(this);
     }
 
-    componentDidMount() {
+    search(ev) {
+        ev.preventDefault();
+        location = `#${document.getElementById("q").value}`;
+        this.refresh();
+    }
+
+    refresh() {
         const q = location.hash
                           .replace(/^#/, "")
                           .split(/[\/\s]+/)
@@ -220,28 +225,32 @@ class LibraryContainer extends React.Component {
             .then(json => this.setState({songs: json.results}));
     }
 
+    componentDidMount() {
+        this.refresh();
+    }
+
     render() {
         return <Library albums={this.state.albums}
                         songs={this.state.songs}
-                        add={this.props.add} />;
+                        add={this.props.add}
+                        search={this.search} />;
     }
 }
 
-const Library = ({albums, songs, add}) => (
-  <div id="library">
-    <form id="search"
-          onSubmit={() => location = `#${document.getElementById("q").value}`}>
+const Library = ({albums, songs, add, search}) => (
+    <div id="library">
+        <form id="search" onSubmit={search}>
         <input type="text" id="q" placeholder="Search" />
-    </form>
-    <ul id="albums">{albums.map(album => (
-        <li key={album.id}>
-        <AlbumContainer album={album} add={add} />
-        </li>
-    ))}</ul>
-    <ul id="songs">{songs.map(song => (
-        <li key={song.id}><Song song={song} add={add} /></li>
-    ))}</ul>
-  </div>
+        </form>
+        <ul id="albums">{albums.map(album => (
+            <li key={album.id}>
+            <AlbumContainer album={album} add={add} />
+            </li>
+        ))}</ul>
+        <ul id="songs">{songs.map(song => (
+            <li key={song.id}><Song song={song} add={add} /></li>
+        ))}</ul>
+    </div>
 )
 
 class AlbumContainer extends React.Component {
