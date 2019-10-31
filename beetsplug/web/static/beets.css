@@ -140,11 +140,20 @@ ul {
     background: #616161;
 }
 
-#playlist .remove {
-    position: absolute;
+#playlist #clear {
+    position: fixed;
     top: 0.25rem;
     right: 0.25rem;
-    background: #900;
+    width: 2rem;
+    height: 2rem;
+    text-align: center;
+    color: #212121;
+    background: #eeeeee;
+    border: solid 0.25rem #616161;
+    border-radius: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 #playlist .art, #playlist .play, #playlist .pause {

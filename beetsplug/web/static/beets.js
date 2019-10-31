@@ -128,6 +128,7 @@ class App extends React.Component {
                       player={this.state.player}
                       toggle={this.toggle}
                       remove={this.remove}
+                      clear={this.clear}
                       setCurrent={this.setCurrent} />
             <LibraryContainer add={this.add} />
             </div>
@@ -139,7 +140,7 @@ class App extends React.Component {
  * PLAYLIST -- list of playable library items.
  */
 
-const Playlist = ({playlist, current, player, toggle, remove, setCurrent}) => (
+const Playlist = ({playlist, current, player, toggle, remove, clear, setCurrent}) => (
     <ul id="playlist">{playlist.map((item, i) => (
         <li key={i}>
         <PlaylistItem item={item}
@@ -148,7 +149,7 @@ const Playlist = ({playlist, current, player, toggle, remove, setCurrent}) => (
                       remove={() => remove(i)}
                       player={player} />
         </li>
-    ))}</ul>
+    ))}{(playlist.length > 0) && <li id="clear" onClick={clear}>&times;</li>}</ul>
 )
 
 class PlaylistItem extends React.Component {
@@ -210,6 +211,7 @@ class LibraryContainer extends React.Component {
     }
 
     refresh() {
+        this.setState({albums: [], songs: []});
         const q = location.hash
                           .replace(/^#/, "")
                           .split(/[\/\s]+/)
@@ -274,10 +276,12 @@ class AlbumContainer extends React.Component {
 
 const Album = ({album, tracks, add}) => (
   <div className="album">
-    <div onClick={() => add(tracks)} className="art"
-         style={{backgroundImage: `url(/album/${album.id}/art)`}}></div>
-    <div onClick={() => add(tracks)} className="title">{album.album}</div>
-    <div onClick={() => add(tracks)} className="artist">{album.albumartist}</div>
+    <div onClick={tracks.length > 0 ? () => add(tracks) : null}
+         className="art" style={{backgroundImage: `url(/album/${album.id}/art)`}}></div>
+    <div onClick={tracks.length > 0 ? () => add(tracks) : null}
+         className="title">{album.album}</div>
+    <div onClick={tracks.length > 0 ? () => add(tracks) : null}
+         className="artist">{album.albumartist}</div>
     <ul className="tracks">{tracks.map((track) => {
         const title = <div className="title">{track.title}</div>;
         const artist = track.artist === track.albumartist ?
