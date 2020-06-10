@@ -90,3 +90,5 @@ ENV/
 /.pydevproject
 /.settings
 .vscode
+/beetsplug/web/static/package-lock.json
+node_modules/
