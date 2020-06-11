@@ -32,23 +32,15 @@ const Playlist = ({items, setItems}) => {
   const remove = i => setItems(its => [...its.splice(i, 1)]);
 
   useEffect(() => {
-    if (items.length > 0 && current < 0) {
-      setCurrent(0);
-    }
-  }, [items]);
-
-  useEffect(() => {
     if (!audio.current) return;
-    const callback = verbose => () => {
+    const callback = () => {
       let buffered = 0;
       if (audio.current.buffered) {
         for (let i = 0; i < audio.current.buffered.length; ++i) {
           buffered = Math.max(buffered, audio.current.buffered.end(i));
         }
       }
-      setAudioState(s => {
-        console.log(s);
-        return {
+      setAudioState(s => ({
         currentTime: audio.current.currentTime,
         totalTime: audio.current.duration,
         bufferedTime: buffered,
@@ -57,34 +49,46 @@ const Playlist = ({items, setItems}) => {
                  !audio.current.ended &&
                  audio.current.currentTime > 0 &&
                  audio.current.readyState > 2,
-      }});
+      }));
     };
-    audio.current.onplay = callback(true);
-    audio.current.onpause = callback(true);
-    audio.current.ontimeupdate = callback(false);
-    audio.current.ondurationchange = callback(true);
+    audio.current.src = '';
+    audio.current.load();
+    audio.current.onplay = callback;
+    audio.current.onpause = callback;
+    audio.current.ontimeupdate = callback;
+    audio.current.ondurationchange = callback;
   }, [audio.current]);
 
   useEffect(() => {
-    if (!audio.current) return;
-    if (!(0 <= current && current < items.length)) return;
-    const item = items[current];
-    audio.current.src = `/item/${item.id}/file`;
-    audio.current.onended = () => {
-      addHistory(item, 'play');
-      if (current < items.length - 1) setCurrent(c => c + 1);
+    if (!items || items.length === 0) {
+      setCurrent(-1);
+      return;
     }
+    if (current < 0) {
+      setCurrent(0);
+      return;
+    }
+    audio.current.src = `/item/${items[current].id}/file`;
+    audio.current.onended = () => {
+      addHistory(items[current], 'play');
+      if (current < items.length - 1) {
+        setCurrent(current + 1);
+      } else {
+        setItems([]);
+      }
+    }
+    audio.current.load();
     audio.current.play();
     return () => {
-      audio.current.onended = null;
-      audio.current.currentTime = 0;
       audio.current.src = '';
       audio.current.load();
+      audio.current.onended = null;
+      audio.current.currentTime = 0;
     }
-  }, [audio.current, current]);
+  }, [current, items]);
 
   return <div className='playlist'>
-    <audio key='audio' ref={audio} />
+    <audio key='audio' ref={audio} prefetch='metadata' />
     <span key='clear' className='clear' onClick={() => setItems([])}>&times;</span>
     {items.map((item, i) => <Item key={`${item.id}-${i}`}
                                   item={item}
