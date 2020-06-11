@@ -22,11 +22,10 @@ const Library = ({items, queue}) => {
 }
 
 
-//  <div className='art' style={{backgroundImage: `url(/album/${album.id}/art)`}}></div>
 const Album = ({album, queue}) => <div className='album' onClick={
     () => axios(`/item/query/album_id:${album.id}`).then(res => queue(res.data.results))
   }>
-  <div className='art'></div>
+  <div className='art' style={{backgroundImage: `url(/album/${album.id}/art)`}}></div>
   <div className='about'>
     <div className='meta'>
       {album.year === 0 ? null : <div className='when'>{`${MONTHS[album.month]} ${album.year}`}</div>}

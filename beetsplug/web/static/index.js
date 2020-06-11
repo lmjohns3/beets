@@ -30097,8 +30097,7 @@ var Library = function Library(_ref) {
   return /*#__PURE__*/_react.default.createElement("div", {
     className: "library"
   }, children);
-}; //  <div className='art' style={{backgroundImage: `url(/album/${album.id}/art)`}}></div>
-
+};
 
 var Album = function Album(_ref2) {
   var album = _ref2.album,
@@ -30111,7 +30110,10 @@ var Album = function Album(_ref2) {
       });
     }
   }, /*#__PURE__*/_react.default.createElement("div", {
-    className: "art"
+    className: "art",
+    style: {
+      backgroundImage: "url(/album/".concat(album.id, "/art)")
+    }
   }), /*#__PURE__*/_react.default.createElement("div", {
     className: "about"
   }, /*#__PURE__*/_react.default.createElement("div", {
