@@ -30097,7 +30097,8 @@ var Library = function Library(_ref) {
   return /*#__PURE__*/_react.default.createElement("div", {
     className: "library"
   }, children);
-};
+}; //  <div className='art' style={{backgroundImage: `url(/album/${album.id}/art)`}}></div>
+
 
 var Album = function Album(_ref2) {
   var album = _ref2.album,
@@ -30110,17 +30111,20 @@ var Album = function Album(_ref2) {
       });
     }
   }, /*#__PURE__*/_react.default.createElement("div", {
-    className: "art",
-    style: {
-      backgroundImage: "url(/album/".concat(album.id, "/art)")
-    }
+    className: "art"
   }), /*#__PURE__*/_react.default.createElement("div", {
-    className: "title"
-  }, album.album), /*#__PURE__*/_react.default.createElement("div", {
+    className: "about"
+  }, /*#__PURE__*/_react.default.createElement("div", {
+    className: "meta"
+  }, album.year === 0 ? null : /*#__PURE__*/_react.default.createElement("div", {
+    className: "when"
+  }, "".concat(MONTHS[album.month], " ").concat(album.year)), album.genre === '' ? null : /*#__PURE__*/_react.default.createElement("div", {
+    className: "genre"
+  }, album.genre)), /*#__PURE__*/_react.default.createElement("div", {
     className: "artist"
   }, album.albumartist), /*#__PURE__*/_react.default.createElement("div", {
-    className: "when"
-  }, "".concat(MONTHS[album.month], " ").concat(album.year)));
+    className: "title"
+  }, album.album)));
 };
 
 var Song = function Song(_ref3) {
@@ -30132,12 +30136,23 @@ var Song = function Song(_ref3) {
       return queue([song]);
     }
   }, /*#__PURE__*/_react.default.createElement("div", {
-    className: "title"
-  }, song.title), song.artist === song.albumartist ? null : /*#__PURE__*/_react.default.createElement("div", {
+    className: "art",
+    style: {
+      background: 'hsl(0, 50%, 80%)'
+    }
+  }), /*#__PURE__*/_react.default.createElement("div", {
+    className: "about"
+  }, /*#__PURE__*/_react.default.createElement("div", {
+    className: "meta"
+  }, song.year === 0 ? null : /*#__PURE__*/_react.default.createElement("div", {
+    className: "when"
+  }, "".concat(MONTHS[song.month], " ").concat(song.year)), song.genre === '' ? null : /*#__PURE__*/_react.default.createElement("div", {
+    className: "genre"
+  }, song.genre)), /*#__PURE__*/_react.default.createElement("div", {
     className: "artist"
   }, song.artist), /*#__PURE__*/_react.default.createElement("div", {
-    className: "when"
-  }, "".concat(MONTHS[song.month], " ").concat(song.year)));
+    className: "title"
+  }, song.title)));
 };
 
 var _default = Library;
@@ -42286,7 +42301,7 @@ function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 var norm = function norm(s) {
-  return s.toUpperCase().replace(/^\W+/, '').replace(/^(A|AN|THE)\s+/, '');
+  return (s > '' ? s : '∅').toUpperCase().replace(/^\W+/, '').replace(/^(A|AN|THE)\s+/, '');
 };
 
 var App = function App() {
@@ -42344,20 +42359,20 @@ var App = function App() {
     };
 
     var getSep = function getSep(s) {
-      return s ? (s + '∅')[0] : '∅';
+      return s[0];
     };
 
     if (order === 'date') {
       indexAlbum = function indexAlbum(a) {
-        return "".concat(a.album.year, "-").concat(a.album.month, "-").concat(a.album.day);
+        return a.album.year > 0 ? "".concat(a.album.year, "-").concat(a.album.month, "-").concat(a.album.day) : null;
       };
 
       indexSong = function indexSong(s) {
-        return "".concat(s.song.year, "-").concat(s.song.month, "-").concat(s.song.day);
+        return s.song.year > 0 ? "".concat(s.song.year, "-").concat(s.song.month, "-").concat(s.song.day) : null;
       };
 
       getSep = function getSep(s) {
-        return s[0] !== '0' ? "".concat(s.slice(0, 3), "x") : '∅';
+        return s ? "".concat(s.slice(0, 3), "0s") : '∅';
       };
     }
 
@@ -42368,10 +42383,6 @@ var App = function App() {
 
       indexSong = function indexSong(s) {
         return s.song.genre;
-      };
-
-      getSep = function getSep(s) {
-        return (s || '∅')[0];
       };
     }
 
@@ -42405,27 +42416,32 @@ var App = function App() {
   return /*#__PURE__*/_react.default.createElement("div", {
     className: "app playlist".concat(playlist.length)
   }, /*#__PURE__*/_react.default.createElement("nav", null, /*#__PURE__*/_react.default.createElement("a", {
+    key: "date",
     className: order === 'date' ? 'order' : '',
     onClick: function onClick() {
       return setOrder('date');
     }
   }, "\uD83D\uDCC5"), /*#__PURE__*/_react.default.createElement("a", {
+    key: "artist",
     className: order === 'artist' ? 'order' : '',
     onClick: function onClick() {
       return setOrder('artist');
     }
   }, "\uD83E\uDDD1\u200D\uD83C\uDFA4"), /*#__PURE__*/_react.default.createElement("a", {
+    key: "title",
     className: order === 'title' ? 'order' : '',
     onClick: function onClick() {
       return setOrder('title');
     }
   }, "\uD83D\uDCBF"), /*#__PURE__*/_react.default.createElement("a", {
+    key: "genre",
     className: order === 'genre' ? 'order' : '',
     onClick: function onClick() {
       return setOrder('genre');
     }
   }, "\uD83C\uDFB8\uFE0F"), index.map(function (i) {
     return /*#__PURE__*/_react.default.createElement("a", {
+      key: "idx-".concat(i),
       href: "#".concat(i)
     }, i);
   })), /*#__PURE__*/_react.default.createElement(_playlist.default, {

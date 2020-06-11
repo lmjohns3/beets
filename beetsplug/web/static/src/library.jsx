@@ -22,20 +22,32 @@ const Library = ({items, queue}) => {
 }
 
 
+//  <div className='art' style={{backgroundImage: `url(/album/${album.id}/art)`}}></div>
 const Album = ({album, queue}) => <div className='album' onClick={
     () => axios(`/item/query/album_id:${album.id}`).then(res => queue(res.data.results))
   }>
-  <div className='art' style={{backgroundImage: `url(/album/${album.id}/art)`}}></div>
-  <div className='title'>{album.album}</div>
-  <div className='artist'>{album.albumartist}</div>
-  <div className='when'>{`${MONTHS[album.month]} ${album.year}`}</div>
+  <div className='art'></div>
+  <div className='about'>
+    <div className='meta'>
+      {album.year === 0 ? null : <div className='when'>{`${MONTHS[album.month]} ${album.year}`}</div>}
+      {album.genre === '' ? null : <div className='genre'>{album.genre}</div>}
+    </div>
+    <div className='artist'>{album.albumartist}</div>
+    <div className='title'>{album.album}</div>
+  </div>
 </div>
 
 
 const Song = ({song, queue}) => <div className='song' onClick={() => queue([song])}>
-  <div className='title'>{song.title}</div>
-  {song.artist === song.albumartist ? null : <div className='artist'>{song.artist}</div>}
-  <div className='when'>{`${MONTHS[song.month]} ${song.year}`}</div>
+  <div className='art' style={{background: 'hsl(0, 50%, 80%)'}}></div>
+  <div className='about'>
+    <div className='meta'>
+      {song.year === 0 ? null : <div className='when'>{`${MONTHS[song.month]} ${song.year}`}</div>}
+      {song.genre === '' ? null : <div className='genre'>{song.genre}</div>}
+    </div>
+    <div className='artist'>{song.artist}</div>
+    <div className='title'>{song.title}</div>
+  </div>
 </div>
 
 

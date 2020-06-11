@@ -8,9 +8,9 @@ import Playlist from './playlist'
 import './beets.styl'
 
 
-const norm = s => s.toUpperCase()
-                   .replace(/^\W+/, '')
-                   .replace(/^(A|AN|THE)\s+/, '');
+const norm = s => (s > '' ? s : '∅').toUpperCase()
+                                    .replace(/^\W+/, '')
+                                    .replace(/^(A|AN|THE)\s+/, '');
 
 
 const App = () => {
@@ -34,16 +34,15 @@ const App = () => {
   useEffect(() => {
     let indexAlbum = a => a.album.album;
     let indexSong = s => s.song.title;
-    let getSep = s => s ? (s + '∅')[0] : '∅';
+    let getSep = s => s[0];
     if (order === 'date') {
-      indexAlbum = a => `${a.album.year}-${a.album.month}-${a.album.day}`;
-      indexSong = s => `${s.song.year}-${s.song.month}-${s.song.day}`;
-      getSep = s => s[0] !== '0' ? `${s.slice(0, 3)}x` : '∅';
+      indexAlbum = a => a.album.year > 0 ? `${a.album.year}-${a.album.month}-${a.album.day}` : null;
+      indexSong = s => s.song.year > 0 ? `${s.song.year}-${s.song.month}-${s.song.day}` : null;
+      getSep = s => s ? `${s.slice(0, 3)}0s` : '∅';
     }
     if (order === 'genre') {
       indexAlbum = a => a.album.genre;
       indexSong = s => s.song.genre;
-      getSep = s => (s || '∅')[0];
     }
     if (order === 'artist') {
       indexAlbum = a => `${a.album.albumartist_sort}${a.album.albumartist}`;
@@ -66,11 +65,11 @@ const App = () => {
 
   return <div className={`app playlist${playlist.length}`}>
     <nav>
-      <a className={order === 'date' ? 'order' : ''} onClick={() => setOrder('date')}>📅</a>
-      <a className={order === 'artist' ? 'order' : ''} onClick={() => setOrder('artist')}>🧑‍🎤</a>
-      <a className={order === 'title' ? 'order' : ''} onClick={() => setOrder('title')}>💿</a>
-      <a className={order === 'genre' ? 'order' : ''} onClick={() => setOrder('genre')}>🎸️</a>
-      {index.map(i => <a href={`#${i}`}>{i}</a>)}
+      <a key='date' className={order === 'date' ? 'order' : ''} onClick={() => setOrder('date')}>📅</a>
+      <a key='artist' className={order === 'artist' ? 'order' : ''} onClick={() => setOrder('artist')}>🧑‍🎤</a>
+      <a key='title' className={order === 'title' ? 'order' : ''} onClick={() => setOrder('title')}>💿</a>
+      <a key='genre' className={order === 'genre' ? 'order' : ''} onClick={() => setOrder('genre')}>🎸️</a>
+      {index.map(i => <a key={`idx-${i}`} href={`#${i}`}>{i}</a>)}
     </nav>
     <Playlist items={playlist} setItems={setPlaylist} />
     <Library items={library} queue={items => setPlaylist(cur => [...cur, ...items])} />

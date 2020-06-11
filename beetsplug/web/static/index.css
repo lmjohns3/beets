@@ -3,9 +3,14 @@
 * {
   box-sizing: border-box;
   color: #1a1a1a;
-  font: 16px/20px 'Work Sans', sans-serif;
   margin: 0;
   padding: 0;
+  font: 16px/1.25 'Work Sans', sans-serif;
+}
+@media all and (max-width: 800px) {
+  * {
+    font: 12px/1.25 'Work Sans', sans-serif;
+  }
 }
 .title {
   font-weight: bold;
@@ -13,39 +18,86 @@
 .artist {
   opacity: 0.9;
 }
+.when {
+  font-size: 0.8rem;
+  max-height: 1rem;
+  opacity: 0.7;
+}
+@media all and (max-width: 800px) {
+  .when {
+    display: none;
+  }
+}
+.genre {
+  font-size: 0.8rem;
+  max-height: 1rem;
+  opacity: 0.5;
+}
+@media all and (max-width: 800px) {
+  .genre {
+    display: none;
+  }
+}
 .art {
   background-color: #407fbf;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  float: left;
 }
 .app {
   display: grid;
-  grid-template-rows: 3rem auto;
-  grid-template-columns: 20rem auto;
-  grid-template-areas: "nav nav" "playlist library";
   height: 100vh;
   place-items: stretch/stretch;
   place-content: stretch/stretch;
   width: 100vw;
+  grid-template-rows: 3rem auto;
+  grid-template-columns: 16rem auto;
+  grid-template-areas: "nav nav" "playlist library";
+}
+@media all and (orientation: portrait) {
+  .app {
+    grid-template-rows: 16rem auto;
+    grid-template-columns: 3rem auto;
+    grid-template-areas: "nav playlist" "nav library";
+  }
 }
 .app.playlist0 {
   grid-template-rows: 3rem auto;
   grid-template-columns: auto;
   grid-template-areas: "nav" "library";
 }
+@media all and (orientation: portrait) {
+  .app.playlist0 {
+    grid-template-rows: auto;
+    grid-template-columns: 3rem auto;
+    grid-template-areas: "nav library";
+  }
+}
 nav {
   background: #4d4d4d;
+  display: flex;
+  flex-flow: row wrap;
   font-weight: bold;
   grid-area: nav;
+  height: 3rem;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  width: 100vw;
+}
+@media all and (orientation: portrait) {
+  nav {
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    width: 3rem;
+  }
 }
 nav a {
   color: #b3b3b3;
   cursor: pointer;
   font-size: 1.5rem;
   line-height: 3rem;
-  padding: 0.5rem;
+  padding: 0 0.75rem 0 0.75rem;
   text-decoration: none;
 }
 nav a:hover {
@@ -56,48 +108,55 @@ nav a.order {
   background: #808080;
 }
 .library {
+  display: flex;
+  flex-flow: row wrap;
   grid-area: library;
+  justify-content: space-evenly;
   overflow-x: hidden;
   overflow-y: scroll;
 }
 .library > div {
   cursor: pointer;
-  display: inline-block;
-  height: 8rem;
-  margin: 1rem 0 0 1rem;
+  height: 11vmax;
   overflow: hidden;
   position: relative;
-  width: 16rem;
+  width: 11vmax;
+}
+.library > div .art {
+  height: 100%;
+  width: 100%;
+}
+.library > div .about {
+  background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 30%, #fff 100%);
+  display: flex;
+  flex-flow: column-reverse nowrap;
+  height: 100%;
+  margin-top: -100%;
+  padding: 0.2rem;
+  width: 100%;
 }
 .library > div .title,
 .library > div .artist,
 .library > div .when {
-  margin-left: 8.5rem;
   overflow: hidden;
+  margin-top: 0.1rem;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 11vmax;
 }
 .library > div .title {
-  max-height: 3.85rem;
+  height: 1.25rem;
 }
 .library > div .artist {
-  max-height: 3.85rem;
-}
-.library > div .when {
-  font-size: smaller;
-  opacity: 0.7;
-}
-.library > div .art {
-  height: 8rem;
-  width: 8rem;
+  height: 1.25rem;
 }
 .library .sep {
   background: #1a1a1a;
-  border-radius: 0.5rem;
   text-align: center;
 }
 .library .sep a {
   color: #e6e6e6;
-  font-size: 7rem;
+  font-size: 3rem;
   line-height: 8rem;
 }
 .playlist {
@@ -125,15 +184,21 @@ nav a.order {
   background: #ccc;
 }
 .playlist .art {
+  float: left;
   height: 2rem;
   margin: 0.2rem;
   width: 2rem;
 }
-.playlist .artist,
-.playlist .title {
-  max-height: 1.1rem;
+.playlist .title,
+.playlist .artist {
+  max-height: 1.25rem;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.playlist .artist {
+  font-size: 0.8rem;
+  max-height: 1rem;
 }
 .playlist .playing {
   height: 1rem;
@@ -143,14 +208,18 @@ nav a.order {
   width: calc(100% - 0.4rem);
 }
 .playlist .playing .bar {
-  color: #000;
   height: 1rem;
   left: 0;
   position: absolute;
   top: 0;
 }
 .playlist .playing .bar .label {
-  font-size: smaller;
+  color: #e6e6e6;
+  display: inline-block;
+  font-size: 0.8rem;
+  line-height: 1rem;
+  padding-right: 0.1rem;
+  vertical-align: top;
 }
 .playlist .playing .total {
   background: #4040bf;
@@ -179,44 +248,6 @@ nav a.order {
   text-align: center;
   width: 2rem;
   z-index: 9;
-}
-@media all and (max-width: 800px) {
-  * {
-    font: 12px/16px 'Work Sans', sans-serif;
-  }
-  .app {
-    grid-template-columns: 16rem auto;
-  }
-}
-@media all and (max-width: 600px) {
-  .app {
-    grid-template-rows: 20rem auto;
-    grid-template-columns: 3rem auto;
-    grid-template-areas: "nav playlist" "nav library";
-  }
-  .app.playlist0 {
-    grid-template-rows: auto;
-    grid-template-columns: 3rem auto;
-    grid-template-areas: "nav library";
-  }
-  .library > div {
-    height: 6rem;
-    margin: 0.5rem 0 0 0.5rem;
-    width: 12rem;
-  }
-  .library > div .title,
-  .library > div .artist {
-    margin-left: 6.25rem;
-  }
-  .library > div .art {
-    float: left;
-    height: 6rem;
-    width: 6rem;
-  }
-  .library .sep {
-    font-size: 5rem;
-    line-height: 6rem;
-  }
 }
 
 
