@@ -30066,6 +30066,18 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 var MONTHS = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 var Library = function Library(_ref) {
@@ -30102,6 +30114,15 @@ var Library = function Library(_ref) {
 var Album = function Album(_ref2) {
   var album = _ref2.album,
       queue = _ref2.queue;
+
+  var _useState = (0, _react.useState)(0),
+      _useState2 = _slicedToArray(_useState, 2),
+      hue = _useState2[0],
+      setHue = _useState2[1];
+
+  (0, _react.useEffect)(function () {
+    setHue(360 * Math.random());
+  }, []);
   return /*#__PURE__*/_react.default.createElement("div", {
     className: "album",
     onClick: function onClick() {
@@ -30112,17 +30133,18 @@ var Album = function Album(_ref2) {
   }, /*#__PURE__*/_react.default.createElement("div", {
     className: "art",
     style: {
+      backgroundColor: "hsl(".concat(hue, ", 50%, 40%)"),
       backgroundImage: "url(/album/".concat(album.id, "/art)")
     }
   }), /*#__PURE__*/_react.default.createElement("div", {
     className: "about"
   }, /*#__PURE__*/_react.default.createElement("div", {
     className: "meta"
-  }, album.year === 0 ? null : /*#__PURE__*/_react.default.createElement("div", {
+  }, album.year > 0 ? /*#__PURE__*/_react.default.createElement("span", {
     className: "when"
-  }, "".concat(MONTHS[album.month], " ").concat(album.year)), album.genre === '' ? null : /*#__PURE__*/_react.default.createElement("div", {
+  }, "".concat(MONTHS[album.month], " ").concat(album.year)) : null, album.year > 0 && album.genre > '' ? ' / ' : null, album.genre > '' ? /*#__PURE__*/_react.default.createElement("span", {
     className: "genre"
-  }, album.genre)), /*#__PURE__*/_react.default.createElement("div", {
+  }, album.genre) : null), /*#__PURE__*/_react.default.createElement("div", {
     className: "artist"
   }, album.albumartist), /*#__PURE__*/_react.default.createElement("div", {
     className: "title"
@@ -30146,11 +30168,11 @@ var Song = function Song(_ref3) {
     className: "about"
   }, /*#__PURE__*/_react.default.createElement("div", {
     className: "meta"
-  }, song.year === 0 ? null : /*#__PURE__*/_react.default.createElement("div", {
+  }, song.year > 0 ? /*#__PURE__*/_react.default.createElement("span", {
     className: "when"
-  }, "".concat(MONTHS[song.month], " ").concat(song.year)), song.genre === '' ? null : /*#__PURE__*/_react.default.createElement("div", {
+  }, "".concat(MONTHS[song.month], " ").concat(song.year)) : null, song.year > 0 && song.genre > '' ? ' / ' : null, song.genre > '' ? /*#__PURE__*/_react.default.createElement("span", {
     className: "genre"
-  }, song.genre)), /*#__PURE__*/_react.default.createElement("div", {
+  }, song.genre) : null), /*#__PURE__*/_react.default.createElement("div", {
     className: "artist"
   }, song.artist), /*#__PURE__*/_react.default.createElement("div", {
     className: "title"
@@ -42132,67 +42154,73 @@ var Playlist = function Playlist(_ref2) {
   };
 
   (0, _react.useEffect)(function () {
-    if (items.length > 0 && current < 0) {
-      setCurrent(0);
-    }
-  }, [items]);
-  (0, _react.useEffect)(function () {
     if (!audio.current) return;
 
-    var callback = function callback(verbose) {
-      return function () {
-        var buffered = 0;
+    var callback = function callback() {
+      var buffered = 0;
 
-        if (audio.current.buffered) {
-          for (var i = 0; i < audio.current.buffered.length; ++i) {
-            buffered = Math.max(buffered, audio.current.buffered.end(i));
-          }
+      if (audio.current.buffered) {
+        for (var i = 0; i < audio.current.buffered.length; ++i) {
+          buffered = Math.max(buffered, audio.current.buffered.end(i));
         }
+      }
 
-        setAudioState(function (s) {
-          console.log(s);
-          return {
-            currentTime: audio.current.currentTime,
-            totalTime: audio.current.duration,
-            bufferedTime: buffered,
-            paused: audio.current.paused,
-            playing: !audio.current.paused && !audio.current.ended && audio.current.currentTime > 0 && audio.current.readyState > 2
-          };
-        });
-      };
-    };
-
-    audio.current.onplay = callback(true);
-    audio.current.onpause = callback(true);
-    audio.current.ontimeupdate = callback(false);
-    audio.current.ondurationchange = callback(true);
-  }, [audio.current]);
-  (0, _react.useEffect)(function () {
-    if (!audio.current) return;
-    if (!(0 <= current && current < items.length)) return;
-    var item = items[current];
-    audio.current.src = "/item/".concat(item.id, "/file");
-
-    audio.current.onended = function () {
-      (0, _db.addHistory)(item, 'play');
-      if (current < items.length - 1) setCurrent(function (c) {
-        return c + 1;
+      setAudioState(function (s) {
+        return {
+          currentTime: audio.current.currentTime,
+          totalTime: audio.current.duration,
+          bufferedTime: buffered,
+          paused: audio.current.paused,
+          playing: !audio.current.paused && !audio.current.ended && audio.current.currentTime > 0 && audio.current.readyState > 2
+        };
       });
     };
 
+    audio.current.src = '';
+    audio.current.load();
+    audio.current.onplay = callback;
+    audio.current.onpause = callback;
+    audio.current.ontimeupdate = callback;
+    audio.current.ondurationchange = callback;
+  }, [audio.current]);
+  (0, _react.useEffect)(function () {
+    if (!items || items.length === 0) {
+      setCurrent(-1);
+      return;
+    }
+
+    if (current < 0) {
+      setCurrent(0);
+      return;
+    }
+
+    audio.current.src = "/item/".concat(items[current].id, "/file");
+
+    audio.current.onended = function () {
+      (0, _db.addHistory)(items[current], 'play');
+
+      if (current < items.length - 1) {
+        setCurrent(current + 1);
+      } else {
+        setItems([]);
+      }
+    };
+
+    audio.current.load();
     audio.current.play();
     return function () {
-      audio.current.onended = null;
-      audio.current.currentTime = 0;
       audio.current.src = '';
       audio.current.load();
+      audio.current.onended = null;
+      audio.current.currentTime = 0;
     };
-  }, [audio.current, current]);
+  }, [current, items]);
   return /*#__PURE__*/_react.default.createElement("div", {
     className: "playlist"
   }, /*#__PURE__*/_react.default.createElement("audio", {
     key: "audio",
-    ref: audio
+    ref: audio,
+    prefetch: "metadata"
   }), /*#__PURE__*/_react.default.createElement("span", {
     key: "clear",
     className: "clear",
