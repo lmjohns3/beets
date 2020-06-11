@@ -1,6 +1,6 @@
 {
-  "short_name": "Music",
-  "name": "Music",
+  "short_name": "Beets",
+  "name": "Beets",
   "icons": [
     {
       "src": "/static/icon-192.png",
@@ -8,7 +8,7 @@
       "sizes": "192x192"
     },
     {
-      "src": "/images/icon-512.png",
+      "src": "/static/icon-512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
