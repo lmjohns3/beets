@@ -4,8 +4,8 @@
 .. image:: https://img.shields.io/codecov/c/github/beetbox/beets.svg
     :target: https://codecov.io/github/beetbox/beets
 
-.. image:: https://travis-ci.org/beetbox/beets.svg?branch=master
-    :target: https://travis-ci.org/beetbox/beets
+.. image:: https://github.com/beetbox/beets/workflows/ci/badge.svg?branch=master
+    :target: https://github.com/beetbox/beets/actions
 
 .. image:: https://repology.org/badge/tiny-repos/beets.svg
     :target: https://repology.org/project/beets/versions
@@ -14,8 +14,7 @@
 beets
 =====
 
-Beets is the media library management system for obsessive-compulsive music
-geeks.
+Beets is the media library management system for obsessive music geeks.
 
 The purpose of beets is to get your music collection right once and for all.
 It catalogs your collection, automatically improving its metadata as it goes.
