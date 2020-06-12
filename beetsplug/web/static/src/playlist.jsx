@@ -34,16 +34,9 @@ const Playlist = ({items, setItems}) => {
   useEffect(() => {
     if (!audio.current) return;
     const callback = () => {
-      let buffered = 0;
-      if (audio.current.buffered) {
-        for (let i = 0; i < audio.current.buffered.length; ++i) {
-          buffered = Math.max(buffered, audio.current.buffered.end(i));
-        }
-      }
       setAudioState(s => ({
         currentTime: audio.current.currentTime,
         totalTime: audio.current.duration,
-        bufferedTime: buffered,
         paused: audio.current.paused,
         playing: !audio.current.paused &&
                  !audio.current.ended &&
@@ -112,9 +105,6 @@ const Item = ({item, isActive, setActive, audio}) => {
       }}>
         <span className='label'>{timeFormat(audio.currentTime)}</span>
       </span>
-      <span className='buffered bar' style={{
-        width: timePercent(audio.bufferedTime, audio.totalTime),
-      }}></span>
       <span className='total bar'>
         <span className='label'>{timeFormat(audio.totalTime)}</span>
       </span>

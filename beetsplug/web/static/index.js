@@ -42157,19 +42157,10 @@ var Playlist = function Playlist(_ref2) {
     if (!audio.current) return;
 
     var callback = function callback() {
-      var buffered = 0;
-
-      if (audio.current.buffered) {
-        for (var i = 0; i < audio.current.buffered.length; ++i) {
-          buffered = Math.max(buffered, audio.current.buffered.end(i));
-        }
-      }
-
       setAudioState(function (s) {
         return {
           currentTime: audio.current.currentTime,
           totalTime: audio.current.duration,
-          bufferedTime: buffered,
           paused: audio.current.paused,
           playing: !audio.current.paused && !audio.current.ended && audio.current.currentTime > 0 && audio.current.readyState > 2
         };
@@ -42274,11 +42265,6 @@ var Item = function Item(_ref3) {
   }, /*#__PURE__*/_react.default.createElement("span", {
     className: "label"
   }, timeFormat(audio.currentTime))), /*#__PURE__*/_react.default.createElement("span", {
-    className: "buffered bar",
-    style: {
-      width: timePercent(audio.bufferedTime, audio.totalTime)
-    }
-  }), /*#__PURE__*/_react.default.createElement("span", {
     className: "total bar"
   }, /*#__PURE__*/_react.default.createElement("span", {
     className: "label"
