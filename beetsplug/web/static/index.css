@@ -5,7 +5,11 @@
   color: #1a1a1a;
   margin: 0;
   padding: 0;
+  scrollbar-width: none;
   font: 16px/1.25 'Work Sans', sans-serif;
+}
+*::-webkit-scrollbar {
+  display: none;
 }
 @media all and (max-width: 800px) {
   * {
