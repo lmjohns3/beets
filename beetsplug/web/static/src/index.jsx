@@ -66,7 +66,7 @@ const App = () => {
   return <div className={`app playlist${playlist.length}`}>
     <nav>
       <a key='date' className={order === 'date' ? 'order' : ''} onClick={() => setOrder('date')}>📅</a>
-      <a key='artist' className={order === 'artist' ? 'order' : ''} onClick={() => setOrder('artist')}>🧑‍🎤</a>
+      <a key='artist' className={order === 'artist' ? 'order' : ''} onClick={() => setOrder('artist')}>🧑</a>
       <a key='title' className={order === 'title' ? 'order' : ''} onClick={() => setOrder('title')}>💿</a>
       <a key='genre' className={order === 'genre' ? 'order' : ''} onClick={() => setOrder('genre')}>🎸️</a>
       {index.map(i => <a key={`idx-${i}`} href={`#${i}`}>{i}</a>)}
