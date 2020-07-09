@@ -99,6 +99,8 @@ nav
   display: flex
   flex-flow: row wrap
   grid-area: library
+  overflow-x: hidden
+  overflow-y: scroll
 
   & > div
     cursor: pointer
@@ -119,7 +121,7 @@ nav
       flex-flow: column-reverse nowrap
       height: __librarysize
       padding: 0.5rem
-      width: 2 * __librarysize
+      min-width: 2 * __librarysize
 
       .title, .artist, .meta
         overflow: hidden
