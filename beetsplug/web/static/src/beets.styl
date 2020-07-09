@@ -99,11 +99,10 @@ nav
   display: flex
   flex-flow: row wrap
   grid-area: library
-  overflow-x: hidden
-  overflow-y: scroll
 
   & > div
     cursor: pointer
+    flex: 1 0 auto
     height: __librarysize
     margin: 0.5rem
     overflow: hidden
@@ -111,14 +110,16 @@ nav
     width: 3 * __librarysize
 
     .art
+      float: left
       height: __librarysize
-      max-width: __librarysize
+      width: __librarysize
 
     .about
       display: flex
       flex-flow: column-reverse nowrap
-      margin: (-1 * __librarysize) 0 0 __librarysize
+      height: __librarysize
       padding: 0.5rem
+      width: 2 * __librarysize
 
       .title, .artist, .meta
         overflow: hidden
