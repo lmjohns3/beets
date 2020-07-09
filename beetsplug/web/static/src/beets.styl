@@ -1,6 +1,7 @@
 @import 'normalize/index.styl'
 
 __navsize = 3rem
+__librarysize = 5rem
 __playlistsize = 16rem
 
 *
@@ -104,28 +105,28 @@ nav
 
   & > div
     cursor: pointer
-    height: 5rem
+    height: __librarysize
     margin: 0.5rem
     overflow: hidden
     position: relative
-    width: 15rem
+    width: 3 * __librarysize
 
     .art
-      height: 5rem
-      max-width: 5rem
+      height: __librarysize
+      max-width: __librarysize
 
     .about
       display: flex
       flex-flow: column-reverse nowrap
-      margin-left: 5rem
+      margin: (-1 * __librarysize) 0 0 __librarysize
       padding: 0.5rem
-      width: 10rem
+      width: 2 * __librarysize
 
       .title, .artist, .meta
         overflow: hidden
         text-overflow: ellipsis
         white-space: nowrap
-        width: 9rem
+        width: (__librarysize - 1rem)
         height: 1.25rem
 
   .sep
@@ -136,7 +137,7 @@ nav
     a
       color: hsl(0, 0%, 90%)
       font-size: 3rem
-      line-height: 8rem
+      line-height: __librarysize
 
 
 .playlist
