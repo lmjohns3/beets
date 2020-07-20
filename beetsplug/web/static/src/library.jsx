@@ -8,14 +8,14 @@ const Library = ({items, queue}) => {
   let current = null;
   const children = [];
   items.forEach(item => {
-    if (item.sep !== current) {
-      current = item.sep;
-      children.push(<div key={`sep-${current}`} className='sep'><a name={current}>{current}</a></div>);
+    if (item.section !== current) {
+      current = item.section;
+      children.push(<div key={`section-${current}`} className='section'><a name={current}>{current}</a></div>);
     }
     children.push(
       item.album
-      ? <Album key={item.key} album={item.album} queue={queue} />
-      : <Song key={item.key} song={item.song} queue={queue} />);
+      ? <Album key={`album-${item.id}-${item.sortKey}`} album={item} queue={queue} />
+      : <Song key={`song-${item.id}-${item.sortKey}`} song={item} queue={queue} />);
   });
 
   return <div className='library'>{children}</div>;
@@ -35,11 +35,7 @@ const Album = ({album, queue}) => {
       backgroundImage: `url(/album/${album.id}/art)`,
     }}></div>
     <div className='about'>
-      <div className='meta'>
-        {album.year > 0 ? <span className='when'>{`${MONTHS[album.month]} ${album.year}`}</span> : null}
-        {(album.year > 0 && album.genre > '') ? ' / ' : null}
-        {album.genre > '' ? <span className='genre'>{album.genre}</span> : null}
-      </div>
+      <div className='meta'><span className='genre'>{album.genre}</span></div>
       <div className='artist'>{album.albumartist}</div>
       <div className='title'>{album.album}</div>
     </div>
@@ -50,11 +46,7 @@ const Album = ({album, queue}) => {
 const Song = ({song, queue}) => <div className='song' onClick={() => queue([song])}>
   <div className='art' style={{background: 'hsl(0, 50%, 80%)'}}></div>
   <div className='about'>
-    <div className='meta'>
-      {song.year > 0 ? <span className='when'>{`${MONTHS[song.month]} ${song.year}`}</span> : null}
-      {(song.year > 0 && song.genre > '') ? ' / ' : null}
-      {song.genre > '' ? <span className='genre'>{song.genre}</span> : null}
-    </div>
+    <div className='meta'><span className='genre'>{song.genre}</span></div>
     <div className='artist'>{song.artist}</div>
     <div className='title'>{song.title}</div>
   </div>

@@ -4,19 +4,17 @@ __navsize = 3rem
 __librarysize = 5rem
 __playlistsize = 16rem
 
+
 *
   box-sizing: border-box
   color: hsl(0, 0%, 10%)
   margin: 0
   padding: 0
 
-  scrollbar-width: none
-  &::-webkit-scrollbar
-    display: none
-
   font: 16px/1.25 'Work Sans', sans-serif
   @media all and (max-width: 800px)
     font: 12px/1.25 'Work Sans', sans-serif
+
 
 .title
   font-weight: bold
@@ -48,36 +46,23 @@ __playlistsize = 16rem
   grid-template-columns: __playlistsize auto
   grid-template-areas: "nav nav" "playlist library"
   @media all and (orientation: portrait)
-    grid-template-rows: __playlistsize auto
-    grid-template-columns: __navsize auto
-    grid-template-areas: "nav playlist" "nav library"
+    grid-template-rows: __navsize __playlistsize auto
+    grid-template-columns: auto
+    grid-template-areas: "nav" "playlist" "library"
 
   &.playlist0
     grid-template-rows: __navsize auto
     grid-template-columns: auto
     grid-template-areas: "nav" "library"
-    @media all and (orientation: portrait)
-      grid-template-rows: auto
-      grid-template-columns: __navsize auto
-      grid-template-areas: "nav library"
 
 
 nav
   background: hsl(0, 0%, 30%)
-  display: flex
-  flex-flow: row wrap
   font-weight: bold
   grid-area: nav
   height: __navsize
-  overflow-x: scroll
-  overflow-y: hidden
+  overflow: hidden
   width: 100vw
-
-  @media all and (orientation: portrait)
-    height: 100vh
-    overflow-x: hidden
-    overflow-y: scroll
-    width: __navsize
 
   a
     color: hsl(0, 0%, 70%)
@@ -86,13 +71,6 @@ nav
     line-height: __navsize
     padding: 0 (__navsize / 4) 0 (__navsize / 4)
     text-decoration: none
-
-    &:hover
-      background: hsl(0, 0%, 50%)
-      color: hsl(0, 0%, 90%)
-
-  a.order
-    background: hsl(0, 0%, 50%)
 
 
 .library
@@ -129,7 +107,7 @@ nav
         white-space: nowrap
         height: 1.25rem
 
-  .sep
+  .section
     background: hsl(0, 0%, 10%)
     border-radius: 1rem
     text-align: center
